@@ -1,0 +1,9 @@
+# Personal scratch file for tracking terminal sessions
+resume.txt
+
+# Backups written by import_titles.py
+*.bak
+
+__pycache__/
+*.pyc
+.DS_Store
