@@ -1,6 +1,9 @@
 # Personal scratch file for tracking terminal sessions
 resume.txt
 
+# Exported session transcript, kept for reference
+pick-movie-session.md
+
 # Backups written by import_titles.py
 *.bak
 
