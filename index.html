@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pick a Movie</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: grid; place-content: center;
+           min-height: 100vh; margin: 0; gap: 1.5rem; text-align: center;
+           background: #111; color: #eee; }
+    #title { font-size: clamp(1.5rem, 6vw, 3rem); font-weight: 600; min-height: 1.2em; }
+    button { font-size: 1.1rem; padding: 0.75rem 2rem; border: 0; border-radius: 999px;
+             background: #e5e5e5; color: #111; cursor: pointer; }
+    button:hover { background: #fff; }
+    #count { color: #888; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div id="title">…</div>
+  <button id="pick">Pick something</button>
+  <div id="count"></div>
+
+  <script>
+    const titleEl = document.querySelector('#title');
+    const countEl = document.querySelector('#count');
+    let titles = [];
+
+    function pick() {
+      if (!titles.length) return;
+      titleEl.textContent = titles[Math.floor(Math.random() * titles.length)];
+    }
+
+    fetch('watchlist.json', { cache: 'no-cache' })
+      .then(r => r.json())
+      .then(data => {
+        titles = data.watchlist.map(e => e.title);
+        countEl.textContent = `${titles.length} titles`;
+        pick();
+      })
+      .catch(() => { titleEl.textContent = 'Could not load the watchlist.'; });
+
+    document.querySelector('#pick').addEventListener('click', pick);
+  </script>
+</body>
+</html>
