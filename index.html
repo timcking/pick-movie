@@ -8,6 +8,7 @@
     body { font-family: system-ui, sans-serif; display: grid; place-content: center;
            min-height: 100vh; margin: 0; gap: 1.5rem; text-align: center;
            background: #241b2e; color: #f5e9ff; }
+    #poster { display: none; width: 200px; border-radius: 8px; margin: 0 auto; }
     #title { font-size: clamp(1.5rem, 6vw, 3rem); font-weight: 600; min-height: 1.2em; cursor: pointer; }
     #title:hover { text-decoration: underline; }
     button { font-size: 1.1rem; padding: 0.75rem 2rem; width: 300px; border: 0; border-radius: 999px;
@@ -17,6 +18,7 @@
   </style>
 </head>
 <body>
+  <img id="poster" alt="">
   <div id="title">…</div>
   <button id="pick">Pick a Random Movie</button>
   <div id="count"></div>
@@ -24,29 +26,43 @@
   <script>
     const OMDB_API_KEY = 'ef5b7e20';
 
+    const posterEl = document.querySelector('#poster');
     const titleEl = document.querySelector('#title');
     const countEl = document.querySelector('#count');
     let titles = [];
     let currentTitle = null;
+    let currentImdbId = null;
 
     function pick() {
       if (!titles.length) return;
       currentTitle = titles[Math.floor(Math.random() * titles.length)];
+      currentImdbId = null;
       titleEl.textContent = currentTitle;
+      posterEl.style.display = 'none';
+      posterEl.src = '';
+      lookUpMovie(currentTitle);
+    }
+
+    function lookUpMovie(title) {
+      fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(title)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (title !== currentTitle || data.Response !== 'True') return;
+          currentImdbId = data.imdbID || null;
+          if (data.Poster && data.Poster !== 'N/A') {
+            posterEl.src = data.Poster;
+            posterEl.alt = `${title} poster`;
+            posterEl.style.display = 'block';
+          }
+        })
+        .catch(() => {});
     }
 
     function searchImdb() {
       if (!currentTitle) return;
-      const fallbackUrl = `https://www.imdb.com/find/?q=${encodeURIComponent(currentTitle)}`;
-
-      fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(currentTitle)}`)
-        .then(r => r.json())
-        .then(data => {
-          window.location.href = data.Response === 'True' && data.imdbID
-            ? `https://www.imdb.com/title/${data.imdbID}/`
-            : fallbackUrl;
-        })
-        .catch(() => { window.location.href = fallbackUrl; });
+      window.location.href = currentImdbId
+        ? `https://www.imdb.com/title/${currentImdbId}/`
+        : `https://www.imdb.com/find/?q=${encodeURIComponent(currentTitle)}`;
     }
 
     fetch('watchlist.json', { cache: 'no-cache' })
